@@ -6,23 +6,62 @@ void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   // This widget is the root of your application.
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  double gdx;
+  double gdy;
+  double gdr = 1;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          title: Text("Custom Paint"),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            setState(() {
+              gdr = 100;
+            });
+          },
         ),
+        // appBar: AppBar(
+        //   title: Text("Custom Paint"),
+        // ),
         body: LayoutBuilder(
-          builder: (context, constraints) => CustomPaint(
-            painter: ShapesPainter(),
-            child: Container(
-              child: Text("Hi"),
-              height: constraints.maxHeight,
-              width: constraints.maxWidth,
-              // color: Colors.greenAccent,
+          builder: (context, constraints) => GestureDetector(
+            onVerticalDragUpdate: (details) {
+              setState(() {
+                gdx = details.globalPosition.dx;
+                gdy = details.globalPosition.dy;
+              });
+
+              // print(gdx);
+            },
+            onScaleUpdate: (ScaleUpdateDetails details) {
+              var newPosition = details.focalPoint;
+              var newRotation = details.rotation;
+              var newScale = details.scale;
+              // print(newPosition);
+              print(newScale);
+              setState(() {
+                print(gdr);
+                gdr = newScale * 50;
+                print(gdr);
+              });
+              //scale and rotation now available
+            },
+            child: CustomPaint(
+              painter: ShapesPainter(gdx, gdy, gdr),
+              child: Container(
+                child: Text("Hi"),
+                height: constraints.maxHeight,
+                width: constraints.maxWidth,
+                // color: Colors.greenAccent,
+              ),
             ),
           ),
         ),
@@ -32,6 +71,10 @@ class MyApp extends StatelessWidget {
 }
 
 class ShapesPainter extends CustomPainter {
+  final dx;
+  final dy;
+  final dr;
+  ShapesPainter(this.dx, this.dy, this.dr);
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint();
@@ -63,7 +106,7 @@ class ShapesPainter extends CustomPainter {
     var center = Offset(size.width / 2, size.height / 2);
 
     // draw the circle on centre of canvas having radius 75.0
-    canvas.drawCircle(center, 80, paint);
+    canvas.drawCircle(Offset(dx.toDouble(), dy.toDouble()), dr, paint);
   }
 
   @override
